@@ -1,0 +1,23 @@
+{
+  "name": "server",
+  "module": "index.ts",
+  "scripts": {
+    "start": "bun src/main.ts",
+    "watch": "bun --watch src/main.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.5",
+    "bun-types": "^1.0.14"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "type": "module",
+  "dependencies": {
+    "@types/cookie": "^1.0.0",
+    "cookie": "^1.0.2",
+    "js-md5": "^0.8.3",
+    "mysql2": "^3.11.3",
+    "redis": "^5.1.1"
+  }
+}
