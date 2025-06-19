@@ -1,4 +1,4 @@
-import { NetMessages } from "../config/net_messages";
+import { NetIdMessages, NetMessages } from "../config/net_messages";
 import { ProtocolWrapper, WsClient } from "../modules/types";
 import { IClients } from "../utils/clients";
 import { deep_clone } from "../utils/utils";
@@ -58,29 +58,18 @@ export function BaseRoom(clients: IClients) {
         const id_user = socket.data.id_user;
         connected_users[id_user] = socket;
         // юзеру - инфу о соединении
-        send_message_socket(socket, 'SC_Init', { server_time: System.now(), id_user, data: info });
+        send_message_socket(socket, NetIdMessages.SC_INIT, { server_time: System.now(), id_user, data: info });
         return true;
-    }
-
-    // переподключился
-    function on_reconnect(socket: WsClient) {
-        const id_user = socket.data.id_user;
-        log("переподключение id_user:", id_user);
-        connected_users[id_user] = socket;
     }
 
     // отключился
     function on_leave(socket: WsClient) {
         delete connected_users[socket.data.id_user];
         log("отключился id_user:", socket.data.id_user);
-        add_message('SC_Leave', { id_user: socket.data.id_user });
+        add_message(NetIdMessages.SC_LEAVE, { id_user: socket.data.id_user });
     }
 
     function on_message<T extends keyof NetMessages>(socket: WsClient, id_message: T, _message: NetMessages[T]) {
-        // if (id_message == 'CS_Ping') {
-        //     const message = _message as NetMessages['CS_Ping'];
-        //     send_message_socket(socket, 'SC_Pong', { client_time: message.client_time, server_time: now() });
-        // }
     }
 
     function update(dt: number) {
@@ -93,7 +82,7 @@ export function BaseRoom(clients: IClients) {
 
 
 
-    return { on_join, on_leave, on_reconnect, on_message, add_message, insert_first_pack, make_message, send_message_socket, send_message_all, send_full_buffer, update, on_socket_update, connected_users };
+    return { on_join, on_leave, on_message, add_message, insert_first_pack, make_message, send_message_socket, send_message_all, send_full_buffer, update, on_socket_update, connected_users };
 }
 
 type IRoom = ReturnType<typeof BaseRoom>;
@@ -102,7 +91,6 @@ type IRoom = ReturnType<typeof BaseRoom>;
 export interface IBaseRoom {
     on_join: IRoom['on_join'];
     on_leave: IRoom['on_leave'];
-    on_reconnect: IRoom['on_reconnect'];
     on_message: IRoom['on_message'];
     update: IRoom['update'];
     on_socket_update: IRoom['on_socket_update'];

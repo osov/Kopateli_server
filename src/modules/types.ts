@@ -13,7 +13,7 @@ export type WsClient = ServerWebSocket<ExtWebSocket>;
 
 
 export interface ProtocolWrapper {
-    id: string;
+    id: number;
     message: any;
 }
 

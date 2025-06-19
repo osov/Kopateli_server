@@ -27,7 +27,7 @@ export function Clients() {
     }
 
     function make_message<T extends keyof NetMessages>(id_message: T, message: NetMessages[T]) {
-        return JSON.stringify({id: id_message, message});
+        return JSON.stringify({id: id_message, msg:message});
     }
 
     function send_message_socket<T extends keyof NetMessages>(socket: WsClient, id_message: T, message: NetMessages[T]) {

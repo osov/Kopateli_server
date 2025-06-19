@@ -31,7 +31,7 @@ export function WsServer<T>(port: number,
                 data: {
                     id_session,
                     id_user: -1,
-                    id_room:-1
+                    id_room: -1
                 },
             });
             if (success) return undefined;
@@ -60,10 +60,20 @@ export function WsServer<T>(port: number,
         client.send(data);
     }
 
+    function remove_client_by_socket(client: WsClient) {
+        try {
+            if (client.readyState == WebSocket.OPEN)
+                client.close();
+        }
+        catch (e) {
+            Log.error('remove_client_by_socket', e);
+        }
+    }
+
     function get_stats() {
         return { pendingWebSockets: server.pendingWebSockets };
     }
 
 
-    return { send, broadcast, get_stats, server }
+    return { send, broadcast, get_stats, remove_client_by_socket, server }
 }
