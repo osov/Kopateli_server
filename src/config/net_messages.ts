@@ -37,7 +37,7 @@ interface CS_CONNECT {
 }
 
 interface SC_INIT {
-    id_user: number
+    id: number
     server_time: number
     data?: any
 }
@@ -47,7 +47,7 @@ interface SC_CLOSE {
 }
 
 interface SC_LEAVE {
-    id_user: number
+    id: number
 }
 
 interface CS_INPUT_STICK {
@@ -83,9 +83,9 @@ interface SC_WORLD_STATE {
     list: EntityFullState[]
 }
 
-interface SC_JOIN {
-    id_user: number
-}
+type SC_JOIN = EntityFullState & {
+    time: number
+};
 
 type SC_STATE_CHANGE = EntityState & {
     time: number

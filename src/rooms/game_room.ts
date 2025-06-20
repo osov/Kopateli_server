@@ -27,7 +27,7 @@ export function GameRoom(id_room: number, clients: IClients) {
         users[id_user] = user;
         // отправляем полный стейт мира
         base.send_message_socket(socket, NetIdMessages.SC_WORLD_STATE, { time: System.now(), list: get_world_state() });
-        base.add_message(NetIdMessages.SC_JOIN, { id_user });
+        base.add_message(NetIdMessages.SC_JOIN, { time: System.now(), ...user.get_state() });
         log('подключился', id_user);
         return result;
     }

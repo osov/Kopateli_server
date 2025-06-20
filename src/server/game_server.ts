@@ -88,7 +88,8 @@ export function GameServer(server_port: number, step_world_rate = 60, rate_socke
         // пакет авторизации
         if (id_message == NetIdMessages.CS_CONNECT) {
             const message = _message as NetMessages[NetIdMessages.CS_CONNECT];
-            const id_session = message.id_session;
+            //const id_session = message.id_session;
+            const id_session = 'session-' + Math.random();
             const is_ok = check_hash(id_session, message.hash);
             // todo временно
             if (!is_ok) {
