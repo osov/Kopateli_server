@@ -55,16 +55,27 @@ interface CS_INPUT_STICK {
     state: number;
 }
 
+
+export enum EntityStatus {
+    IDLE,
+    MOVING,
+    DIGGING,
+    FINDING,
+    DIE
+}
+
 export interface EntityState {
     id: number;
     position: { x: number, y: number };
     angle: number;
-    status: number;
+    status: EntityStatus;
     status_data?: any;
 }
 
 export type EntityFullState = EntityState & {
     nick: string;
+    male:number;
+    speed:number
 };
 
 interface SC_WORLD_STATE {

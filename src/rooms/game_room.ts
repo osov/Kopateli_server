@@ -22,7 +22,7 @@ export function GameRoom(id_room: number, clients: IClients) {
     function on_join(socket: WsClient, info: any) {
         const result = base.on_join(socket, info);
         const id_user = socket.data.id_user;
-        const user = User(socket.data.id_user, 'nick-' + id_user, 10);
+        const user = User(socket.data.id_user, 1, 'nick-' + id_user, 20);
         user.load_state(313, -245, 0);
         users[id_user] = user;
         // отправляем полный стейт мира
