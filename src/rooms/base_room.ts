@@ -58,7 +58,7 @@ export function BaseRoom(clients: IClients) {
         const id_user = socket.data.id_user;
         connected_users[id_user] = socket;
         // юзеру - инфу о соединении
-        send_message_socket(socket, NetIdMessages.SC_INIT, { server_time: System.now(), id: id_user, data: info });
+        send_message_socket(socket, NetIdMessages.SC_INIT, { server_time: System.now(), id_user, data: info });
         return true;
     }
 
@@ -66,17 +66,19 @@ export function BaseRoom(clients: IClients) {
     function on_leave(socket: WsClient) {
         delete connected_users[socket.data.id_user];
         log("отключился id_user:", socket.data.id_user);
-        add_message(NetIdMessages.SC_LEAVE, { id: socket.data.id_user });
+        add_message(NetIdMessages.SC_LEAVE, { id_user: socket.data.id_user, id_entity: -1 });
     }
 
     function on_message<T extends keyof NetMessages>(socket: WsClient, id_message: T, _message: NetMessages[T]) {
     }
 
     function update(dt: number) {
-        
+
     }
 
     function on_socket_update() {
+        if (buffer_messages.length === 0) return;
+        insert_first_pack(NetIdMessages.SC_TIMESTAMP, { time: System.now() });
         send_full_buffer();
     }
 

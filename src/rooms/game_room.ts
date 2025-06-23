@@ -18,24 +18,34 @@ export function GameRoom(id_room: number, clients: IClients) {
         return list;
     }
 
+    function create_user(id_user: number) {
+        const user = User(id_user, true, 'nick-' + id_user, 20);
+        user.load_state(313, -245, 0);
+        users[id_user] = user;
+        base.add_message(NetIdMessages.SC_ADD_ENTITY, { time: System.now(), ...user.get_state() });
+        return user;
+    }
+
     // подключился, авторизован
     function on_join(socket: WsClient, info: any) {
         const result = base.on_join(socket, info);
         const id_user = socket.data.id_user;
-        const user = User(socket.data.id_user, 1, 'nick-' + id_user, 20);
-        user.load_state(313, -245, 0);
-        users[id_user] = user;
+        const user = create_user(id_user);
         // отправляем полный стейт мира
-        base.send_message_socket(socket, NetIdMessages.SC_WORLD_STATE, { time: System.now(), list: get_world_state() });
-        base.add_message(NetIdMessages.SC_JOIN, { time: System.now(), ...user.get_state() });
-        log('подключился', id_user);
+        base.send_message_all(NetIdMessages.SC_JOIN, { id_user, id_entity: user.get_id() });
+        base.send_message_socket(socket, NetIdMessages.SC_WORLD_STATE, { list: get_world_state() });
+        log('подключился:', id_user);
         return result;
     }
 
     // отключился
     function on_leave(socket: WsClient) {
+        const user = users[socket.data.id_user];
+        const id_entity = user.get_id();
         delete users[socket.data.id_user];
-        return base.on_leave(socket);
+        delete base.connected_users[socket.data.id_user];
+        log("отключился id_user:", socket.data.id_user);
+        base.add_message(NetIdMessages.SC_LEAVE, { id_user: socket.data.id_user, id_entity });
     }
 
 

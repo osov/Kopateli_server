@@ -15,7 +15,7 @@ interface MovingData {
 
 export type IUser = ReturnType<typeof User>;
 
-export function User(id: number, male: number, nick: string, speed: number) {
+export function User(id: number, is_male: boolean, nick: string, speed: number) {
     const stick_state: StickState = { angle: 0, state: false };
     let status = EntityStatus.IDLE;
     let status_moving: MovingData | undefined;
@@ -52,9 +52,13 @@ export function User(id: number, male: number, nick: string, speed: number) {
     }
 
     function get_state(): EntityFullState {
-        return { id, position, angle: stick_state.angle, nick, status, status_data: status_moving, male, speed };
+        return { id, position, angle: stick_state.angle, nick, status, status_data: status_moving, male: is_male ? 1 : 0, speed };
+    }
+
+    function get_id(){
+        return id
     }
 
 
-    return { load_state, on_input_stick, update, get_state };
+    return { load_state, on_input_stick, update, get_state, get_id };
 }
