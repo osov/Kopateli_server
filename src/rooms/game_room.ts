@@ -46,6 +46,7 @@ export function GameRoom(id_room: number, clients: IClients) {
         delete base.connected_users[socket.data.id_user];
         log("отключился id_user:", socket.data.id_user);
         base.add_message(NetIdMessages.SC_LEAVE, { id_user: socket.data.id_user, id_entity });
+        base.add_message(NetIdMessages.SC_REMOVE_ENTITY, { id:id_entity });
     }
 
 

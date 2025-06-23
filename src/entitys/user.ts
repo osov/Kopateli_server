@@ -29,9 +29,8 @@ export function User(id: number, is_male: boolean, nick: string, speed: number) 
 
     function on_input_stick(data: NetMessages[NetIdMessages.CS_INPUT_STICK]) {
         stick_state.state = data.state == 1;
-        if (stick_state.state)
-            stick_state.angle = data.angle;
         if (stick_state.state) {
+            stick_state.angle = data.angle;
             status = EntityStatus.MOVING;
             status_moving = { start: { x: position.x, y: position.y }, time: System.now(), speed };
         }
@@ -55,7 +54,7 @@ export function User(id: number, is_male: boolean, nick: string, speed: number) 
         return { id, position, angle: stick_state.angle, nick, status, status_data: status_moving, male: is_male ? 1 : 0, speed };
     }
 
-    function get_id(){
+    function get_id() {
         return id
     }
 
