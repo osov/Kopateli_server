@@ -4,7 +4,7 @@ import {ServerWebSocket} from "bun";
 
 export interface ExtWebSocket {
     id_user: number;
-    id_room:number;
+    id_room:string;
     id_session: string;
     status: UserStatus;
 }
@@ -19,7 +19,8 @@ export interface ProtocolWrapper {
 
 export enum UserStatus {
     NONE,
-    REGISTER,
+    WAIT_LOADING,
+    IN_ROOM,
 }
 
 export type User = {

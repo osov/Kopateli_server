@@ -25,6 +25,7 @@ export function User(id: number, is_male: boolean, nick: string, speed: number) 
         position.x = x;
         position.y = y;
         stick_state.angle = _angle;
+        log("SET", x, y, _angle);
     }
 
     function on_input_stick(data: NetMessages[NetIdMessages.CS_INPUT_STICK]) {

@@ -6,7 +6,7 @@ import { BaseRoom } from "./base_room";
 
 export type IGameRoom = ReturnType<typeof GameRoom>;
 
-export function GameRoom(id_room: number, clients: IClients) {
+export function GameRoom(id_room: string, clients: IClients) {
     const base = BaseRoom(clients);
     const users: { [id_user: number]: IUser } = {};
 
@@ -18,19 +18,19 @@ export function GameRoom(id_room: number, clients: IClients) {
         return list;
     }
 
-    function create_user(id_user: number) {
+    function create_user(id_user: number, x:number, y:number) {
         const user = User(id_user, true, 'nick-' + id_user, 20);
-        user.load_state(313, -245, 0);
+        user.load_state(x, y, 0);
         users[id_user] = user;
         base.add_message(NetIdMessages.SC_ADD_ENTITY, { time: System.now(), ...user.get_state() });
         return user;
     }
 
     // подключился, авторизован
-    function on_join(socket: WsClient, info: any) {
+    function on_join(socket: WsClient, info: {x:number, y:number}) {
         const result = base.on_join(socket, info);
         const id_user = socket.data.id_user;
-        const user = create_user(id_user);
+        const user = create_user(id_user, info.x, info.y);
         // отправляем полный стейт мира
         base.send_message_all(NetIdMessages.SC_JOIN, { id_user, id_entity: user.get_id() });
         base.send_message_socket(socket, NetIdMessages.SC_WORLD_STATE, { list: get_world_state() });
@@ -41,12 +41,16 @@ export function GameRoom(id_room: number, clients: IClients) {
     // отключился
     function on_leave(socket: WsClient) {
         const user = users[socket.data.id_user];
+        if (!user){
+            log('leave not joined', socket.data.id_user);
+            return;
+        }
         const id_entity = user.get_id();
         delete users[socket.data.id_user];
         delete base.connected_users[socket.data.id_user];
-        log("отключился id_user:", socket.data.id_user);
+        log("отключился id_user[" + socket.data.id_user + "]:" + id_room);
         base.add_message(NetIdMessages.SC_LEAVE, { id_user: socket.data.id_user, id_entity });
-        base.add_message(NetIdMessages.SC_REMOVE_ENTITY, { id:id_entity });
+        base.add_message(NetIdMessages.SC_REMOVE_ENTITY, { id: id_entity });
     }
 
 

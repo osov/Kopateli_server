@@ -31,7 +31,7 @@ export function WsServer<T>(port: number,
                 data: {
                     id_session,
                     id_user: -1,
-                    id_room: -1
+                    id_room: ''
                 },
             });
             if (success) return undefined;

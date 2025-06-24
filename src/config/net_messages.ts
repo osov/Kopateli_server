@@ -21,7 +21,9 @@ export enum NetIdMessages {
     SC_TIMESTAMP,
     CS_INPUT_STICK,
     SC_WORLD_STATE,
-    SC_STATE_CHANGE
+    SC_STATE_CHANGE,
+    CS_REQUEST_INTERACT,
+    SC_RESPONSE_INTERACT,
 }
 
 interface CS_PING {
@@ -108,6 +110,17 @@ interface SC_TIMESTAMP{
     time: number
 }
 
+interface CS_REQUEST_INTERACT{
+    id:string;
+    type:number;
+}
+
+interface SC_RESPONSE_INTERACT{
+    status:number;
+    id:string;
+    x:number;
+    y:number;
+}
 
 export type NetMessages = {
     [NetIdMessages.CS_PING]: CS_PING
@@ -123,4 +136,6 @@ export type NetMessages = {
     [NetIdMessages.CS_INPUT_STICK]: CS_INPUT_STICK
     [NetIdMessages.SC_WORLD_STATE]: SC_WORLD_STATE
     [NetIdMessages.SC_STATE_CHANGE]: SC_STATE_CHANGE
+    [NetIdMessages.CS_REQUEST_INTERACT]: CS_REQUEST_INTERACT
+    [NetIdMessages.SC_RESPONSE_INTERACT]: SC_RESPONSE_INTERACT
 };
