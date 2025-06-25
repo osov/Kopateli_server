@@ -12,11 +12,6 @@ export const _GAME_CONFIG = {
             x: 57,
             y: -76
         },
-        location_1: {
-            layer: 5,
-            x: 166.7,
-            y: -84.8
-        },
         home_mechanic: {
             layer: 3,
             x: 28 / 0.35,
@@ -31,7 +26,22 @@ export const _GAME_CONFIG = {
             layer: 2,
             x: -177.8,
             y: -330.2
-        }
+        },
+        home_shop: {
+            layer: 2,
+            x: -177.8,
+            y: -330.2
+        },
+        location_1: {
+            layer: 5,
+            x: 166.7,
+            y: -84.8
+        },
+        location_tutorial: {
+            layer: 5,
+            x: 166.7,
+            y: -84.8
+        },
     }
 };
 
