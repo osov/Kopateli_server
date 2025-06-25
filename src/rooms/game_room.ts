@@ -34,7 +34,7 @@ export function GameRoom(id_room: string, clients: IClients) {
         // отправляем полный стейт мира
         base.send_message_all(NetIdMessages.SC_JOIN, { id_user, id_entity: user.get_id() });
         base.send_message_socket(socket, NetIdMessages.SC_WORLD_STATE, { list: get_world_state() });
-        log('подключился:', id_user);
+        log("подключился id_user[" + socket.data.id_user + "]:" + id_room);
         return result;
     }
 

@@ -43,7 +43,7 @@ export function GameServer(server_port: number, step_world_rate = 60, rate_socke
         log("Запущен сервер на порту:" + server_port);
 
 
-        room_manager.init();
+        await room_manager.init();
         command_server = CommandServer(server_port + 1, clients, server);
         setTimeout(() => update(), step_world);
     }

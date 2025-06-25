@@ -41,10 +41,15 @@ interface CS_CONNECT {
     version: number
 }
 
+interface LocationData{
+    id:string;
+    layer:number;
+}
+
 interface SC_INIT {
     id_user: number
     server_time: number
-    data?: any
+    data: LocationData
 }
 
 interface SC_CLOSE {
@@ -110,16 +115,19 @@ interface SC_TIMESTAMP{
     time: number
 }
 
+export enum RequestType{
+    REQUEST,
+    CONFIRM
+}
+
 interface CS_REQUEST_INTERACT{
     id:string;
-    type:number;
+    type:RequestType;
 }
 
 interface SC_RESPONSE_INTERACT{
     status:number;
-    id:string;
-    x:number;
-    y:number;
+    result?:LocationData;
 }
 
 export type NetMessages = {

@@ -57,8 +57,6 @@ export function BaseRoom(clients: IClients) {
     function on_join(socket: WsClient, info: any) {
         const id_user = socket.data.id_user;
         connected_users[id_user] = socket;
-        // юзеру - инфу о соединении
-        send_message_socket(socket, NetIdMessages.SC_INIT, { server_time: System.now(), id_user, data: info });
         return true;
     }
 
