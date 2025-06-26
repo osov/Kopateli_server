@@ -42,7 +42,7 @@ export const _GAME_CONFIG: IGameConfig = {
             zones: []
         },
         location_1: {
-            layer: 5,
+            layer: 6,
             x: 166.7,
             y: -84.8,
             zones: []
