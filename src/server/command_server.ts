@@ -28,29 +28,29 @@ export function CommandServer(port: number, clients: IClients, ws_server: IWsSer
                 return do_response(ws_server.get_stats());
             }
             else if (cmd_get == 'get_sessions') {
-                return do_response(Users.users_sessions);
+                return do_response(UserStates.users_sessions);
             }
             else if (cmd_get == 'get_users') {
-                return do_response(Users.users);
+                return do_response(UserStates.users);
             }
             else if (cmd_get == 'users_sessions') {
-                return do_response(Users.users_sessions);
+                return do_response(UserStates.users_sessions);
             }
             else if (cmd_get == 'del_cache_id_user') {
                 const id = url.searchParams.get('id') || '';
-                const user = Users.get_cached_by_id_user(parseInt(id));
+                const user = UserStates.get_cached_by_id_user(parseInt(id));
                 if (!user)
                     return do_response({ result: 'not found', id });
-                delete Users.users[user.id];
-                delete Users.users_sessions[user.id_session];
+                delete UserStates.users[user.id];
+                delete UserStates.users_sessions[user.id_session];
                 return do_response({ result: 'ok', id });
             }
             else if (cmd_get == 'update_user') {
-                const result = await Users.get_by_id_user(parseInt(url.searchParams.get('id')!), true);
+                const result = await UserStates.get_by_id_user(parseInt(url.searchParams.get('id')!), true);
                 return do_response({ result });
             }
             else if (cmd_get == 'get_user') {
-                return do_response(await Users.get_by_id_user(parseInt(url.searchParams.get('id')!)));
+                return do_response(await UserStates.get_by_id_user(parseInt(url.searchParams.get('id')!)));
             }
             return do_response("403");
         }
