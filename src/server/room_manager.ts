@@ -1,12 +1,11 @@
 import { NetIdMessages, NetMessages, RequestType } from "../config/net_messages";
-import { User, UserStatus, WsClient } from "../modules/types";
-import { IBaseRoom } from "../rooms/base_room";
-import { GameRoom } from "../rooms/game_room";
+import { UserState, UserStatus, WsClient } from "../modules/types";
+import { GameRoom, IGameRoom } from "../rooms/game_room";
 import { IClients } from "../utils/clients";
 
 export function RoomManager(clients: IClients) {
     const locations = GAME_CONFIG.locations;
-    const rooms: { [k: string]: IBaseRoom } = {};
+    const rooms: { [k: string]: IGameRoom } = {};
 
     async function init() {
         for (const id in GAME_CONFIG.locations) {
@@ -74,29 +73,8 @@ export function RoomManager(clients: IClients) {
         }
     }
 
-    function leave_active_room(socket: WsClient) {
-        if (socket.data.id_room !== '') {
-            const rid = socket.data.id_room;
-            const room = rooms[rid];
-            if (room != undefined)
-                room.on_leave(socket);
-        }
-    }
-
-    async function on_user_authorized(socket: WsClient, user: User) {
-        socket.data.id_room = 'main';
-        socket.data.status = UserStatus.WAIT_LOADING;
-        // юзеру - инфу о соединении
-        const location = locations[socket.data.id_room as keyof typeof locations];
-        clients.send_message_socket(socket, NetIdMessages.SC_INIT, {
-            server_time: System.now(), id_user: socket.data.id_user,
-            data: { id: socket.data.id_room, layer: location.layer }
-        });
-    }
-
     function get_user_positon(socket: WsClient, with_prev = false) {
         const location = locations[socket.data.id_room as keyof typeof locations];
-
         let x = location.x;
         let y = location.y;
         if (location.zones && location.zones.length > 0) {
@@ -105,22 +83,55 @@ export function RoomManager(clients: IClients) {
             if (with_prev) {
                 for (let i = 0; i < location.zones.length; i++) {
                     const zone = location.zones[i];
-                    if (zone.name == 'to_'+socket.data.prev_room) {
+                    if (zone.name == 'to_' + socket.data.prev_room) {
                         x = zone.x;
                         y = zone.y;
                         break;
                     }
-
                 }
             }
         }
         return { x, y }
     }
 
-    async function on_message<T extends keyof NetMessages>(socket: WsClient, id_message: T, _message: NetMessages[T]) {
+    async function on_user_authorized(socket: WsClient, user: UserState) {
+        // не распознали сессию, нужны данные для регистрации
+        let wait_authorize = true;
+        socket.data.id_room = 'main';
+        socket.data.status = wait_authorize ? UserStatus.WAIT_AUTHORIZE : UserStatus.WAIT_LOADING;
+        const location = locations[socket.data.id_room as keyof typeof locations];
+        clients.send_message_socket(socket, NetIdMessages.SC_INIT, {
+            server_time: System.now(), 
+            id_user: socket.data.id_user,
+            wait_authorize,
+            nick: user.nick,
+            gender: user.gender,
+            data: { id: socket.data.id_room, layer: location.layer }
+        });
+    }
+
+    async function on_message<T extends keyof NetMessages>(socket: WsClient, user: UserState, id_message: T, _message: NetMessages[T]) {
         const room = rooms[socket.data.id_room];
         if (!room)
             return;
+
+        // запрос регистрации
+        if (id_message == NetIdMessages.CS_REGISTER) {
+            if (socket.data.status != UserStatus.WAIT_AUTHORIZE) {
+                Log.error('Пользователь не в статусе ожидания авторизации:', socket.data);
+                return;
+            }
+            const message = _message as NetMessages[NetIdMessages.CS_REGISTER];
+            // todo запись в базу и проверки
+            if (message.nick.trim() == 'test') {
+                clients.send_message_socket(socket, NetIdMessages.SC_REGISTER, { result: 0, text: 'Такой ник занят' });
+                return;
+            }
+            user.nick = message.nick;
+            user.gender = message.gender;
+            socket.data.status = UserStatus.WAIT_LOADING;
+            clients.send_message_socket(socket, NetIdMessages.SC_REGISTER, { result: 1 });
+        }
 
         // запрос перехода в другую комнату
         if (id_message == NetIdMessages.CS_REQUEST_INTERACT) {
@@ -129,7 +140,7 @@ export function RoomManager(clients: IClients) {
             if (message.type == RequestType.REQUEST && socket.data.status == UserStatus.IN_ROOM) {
                 if (message.id.startsWith('to_')) {
                     const to_room = message.id.substring(3);
-                    if (to_room == socket.data.id_room){
+                    if (to_room == socket.data.id_room) {
                         clients.send_message_socket(socket, NetIdMessages.SC_RESPONSE_INTERACT, { status: 0, result: { id: to_room, layer: 0 } });
                         return;
                     }
@@ -152,7 +163,9 @@ export function RoomManager(clients: IClients) {
             // был в процессе загрузки
             else if (message.type == RequestType.CONFIRM && socket.data.status == UserStatus.WAIT_LOADING) {
                 const { x, y } = get_user_positon(socket, true);
-                room.on_join(socket, { x, y });
+                user.x = x;
+                user.y = y;
+                room.on_join(socket, user);
                 socket.data.status = UserStatus.IN_ROOM;
             }
             return;
@@ -168,5 +181,5 @@ export function RoomManager(clients: IClients) {
 
 
 
-    return { init, update, on_connect, on_disconnect, on_message, on_user_authorized, leave_active_room };
+    return { init, update, on_connect, on_disconnect, on_message, on_user_authorized };
 }

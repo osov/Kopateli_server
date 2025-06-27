@@ -20,12 +20,19 @@ export interface ProtocolWrapper {
 
 export enum UserStatus {
     NONE,
+    WAIT_AUTHORIZE,
     WAIT_LOADING,
     IN_ROOM,
 }
 
-export type User = {
+export type UserState = {
     id: number
     id_session: string
     nick: string
+
+    x: number
+    y: number
+    angle: number
+    gender: number
+    speed: number
 }

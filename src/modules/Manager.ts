@@ -7,7 +7,7 @@ import { register_log } from "./Log";
 import { register_event_bus } from "./EventBus";
 import { register_redis } from "./Redis";
 import { register_database } from "./Database";
-import { register_users } from "./Users";
+import { register_user_states } from "./UserStates";
 import { _UserMessages } from "../config/event_messages";
 
 
@@ -35,7 +35,7 @@ function ManagerModule() {
         register_system();
         register_log();
         register_event_bus();
-        register_users();
+        register_user_states();
         //await register_redis();
         //await register_database();
     }

@@ -1,4 +1,5 @@
 import { EntityFullState, EntityStatus, NetIdMessages, NetMessages } from "../config/net_messages";
+import { UserState } from "../modules/types";
 import { Vec2XY } from "../utils/math_utils";
 
 interface StickState {
@@ -13,19 +14,23 @@ interface MovingData {
     speed: number;
 }
 
+
+
 export type IUser = ReturnType<typeof User>;
 
-export function User(id: number, is_male: boolean, nick: string, speed: number) {
+export function User(id: number, is_male: boolean, nick: string) {
     const stick_state: StickState = { angle: 0, state: false };
     let status = EntityStatus.IDLE;
     let status_moving: MovingData | undefined;
+    let speed = 0;
     const position = { x: 0, y: 0 };
 
-    function load_state(x: number, y: number, _angle: number) {
-        position.x = x;
-        position.y = y;
-        stick_state.angle = _angle;
-        log("SET", x, y, _angle);
+    function load_state(state: UserState) {
+        position.x = state.x;
+        position.y = state.y;
+        speed = state.speed;
+        stick_state.angle = state.angle;
+        log("set state[" + id + "]", state);
     }
 
     function on_input_stick(data: NetMessages[NetIdMessages.CS_INPUT_STICK]) {

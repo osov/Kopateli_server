@@ -89,9 +89,9 @@ export function GameServer(server_port: number, step_world_rate = 60, rate_socke
                 //return;
             }
             socket.data.id_session = id_session; // add session
-            let user_data = await Users.get_by_id_session(id_session);
+            let user_data = await UserStates.get_by_id_session(id_session);
             if (user_data === undefined) {
-                user_data = await Users.create(id_session);
+                user_data = await UserStates.create(id_session);
                 if (user_data === undefined) {
                     Log.error("Ошибка создания нового пользователя", id_session);
                     return;
@@ -105,7 +105,7 @@ export function GameServer(server_port: number, step_world_rate = 60, rate_socke
                 Log.error('[!!!] Пользователь уже подключен, отключаем другого:', message);
                 Log.error('client:', connected_client.data);
                 // был в комнате, корректно обработаем
-                room_manager.leave_active_room(connected_client);
+                room_manager.on_disconnect(connected_client);
                 clients.remove_by_socket(connected_client);
                 server.remove_client_by_socket(connected_client);
             }
@@ -124,13 +124,13 @@ export function GameServer(server_port: number, step_world_rate = 60, rate_socke
             return;
         }
 
-        const user = Users.get_cached_by_id_user(socket.data.id_user);
+        const user = UserStates.get_cached_by_id_user(socket.data.id_user);
         if (!user) {
             Log.error('[!!!] Юзер не найден среди подключенных', id_message, _message);
             return;
         }
 
-        room_manager.on_message(socket, id_message, _message);
+        room_manager.on_message(socket, user, id_message, _message);
     }
 
     return { start };

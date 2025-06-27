@@ -1,26 +1,26 @@
-import { User } from "./types";
+import { UserState } from "./types";
 
 
 declare global {
-    const Users: ReturnType<typeof UsersModule>;
+    const UserStates: ReturnType<typeof UserStatesModule>;
 }
 
-export function register_users() {
-    (global as any).Users = UsersModule();
+export function register_user_states() {
+    (global as any).UserStates = UserStatesModule();
 }
 
-export function UsersModule() {
-    const users: { [id_user: number]: User } = {};
+export function UserStatesModule() {
+    const users: { [id_user: number]: UserState } = {};
     const users_sessions: { [id_session: string]: number } = {};
 
-    function add_user_in_cache(id_session: string, user: User | undefined) {
+    function add_user_in_cache(id_session: string, user: UserState | undefined) {
         if (user) {
             users[user.id] = user;
             users_sessions[id_session] = user.id;
         }
     }
 
-    async function create(id_session: string): Promise<User | undefined> {
+    async function create(id_session: string): Promise<UserState | undefined> {
         if (id_session === undefined || id_session === "") return;
         // todo
         //const user = await db_create_new_user(id_session);
@@ -32,10 +32,10 @@ export function UsersModule() {
     let fid = 0;
     function create_fake(id_session: string) {
         fid++;
-        return { id: fid, id_session: id_session, nick: "Игрок "+fid };
+        return { id: fid, id_session: id_session, nick: "Игрок " + fid, x: 0, y: 0, angle: 0, gender: 1, speed: 20 };
     }
 
-    async function get_by_id_session(id_session: string): Promise<User | undefined> {
+    async function get_by_id_session(id_session: string): Promise<UserState | undefined> {
         if (id_session === undefined || id_session === "") return;
         let id_user = users_sessions[id_session];
         if (id_user) {
@@ -50,7 +50,7 @@ export function UsersModule() {
     }
 
 
-    function get_cached_by_id_user(id_user: number): User | undefined {
+    function get_cached_by_id_user(id_user: number): UserState | undefined {
         return users[id_user];
     }
 
@@ -65,7 +65,7 @@ export function UsersModule() {
         }
     }
 
-    function get_cached_by_nick(nick: string): User | undefined {
+    function get_cached_by_nick(nick: string): UserState | undefined {
         for (const id_user in users) {
             const user = users[id_user]
             if (user.nick === nick) return user;
@@ -96,7 +96,7 @@ export function UsersModule() {
         return get_cached_by_nick(nick) !== undefined;
     }
 
-    async function set_property<T extends keyof User>(id_user: number, prop: T, value: User[T]) {
+    async function set_property<T extends keyof UserState>(id_user: number, prop: T, value: UserState[T]) {
         const user = await get_by_id_user(id_user);
         if (user) {
             const success = await db_set_user_property(user.id, prop, value);
@@ -112,10 +112,10 @@ export function UsersModule() {
     // DATABASE
     // ------------------------------------------------------
 
-    async function db_get_user_data_by_id_session(id_session: string): Promise<User | undefined> {
+    async function db_get_user_data_by_id_session(id_session: string): Promise<UserState | undefined> {
         try {
             const [results, fields] = await Database.query('SELECT * FROM `users` WHERE `id_session` = ? LIMIT 1', [id_session]);
-            const users: User[] = results as any as User[];
+            const users: UserState[] = results as any as UserState[];
             if (users.length > 0) {
                 return users[0];
             }
@@ -124,10 +124,10 @@ export function UsersModule() {
         }
     }
 
-    async function db_get_user_data_by_id(id: number): Promise<User | undefined> {
+    async function db_get_user_data_by_id(id: number): Promise<UserState | undefined> {
         try {
             const [results, fields] = await Database.query('SELECT * FROM `users` WHERE `id` = ? LIMIT 1', [id]);
-            const users: User[] = results as any as User[];
+            const users: UserState[] = results as any as UserState[];
             if (users.length > 0) {
                 return users[0];
             }
@@ -136,10 +136,10 @@ export function UsersModule() {
         }
     }
 
-    async function db_get_user_data_by_nick(nick: string): Promise<User | undefined> {
+    async function db_get_user_data_by_nick(nick: string): Promise<UserState | undefined> {
         try {
             const [results, fields] = await Database.query('SELECT * FROM `users` WHERE `nick` = ? LIMIT 1', [nick]);
-            const users: User[] = results as any as User[];
+            const users: UserState[] = results as any as UserState[];
             if (users.length > 0) {
                 return users[0];
             }
@@ -148,11 +148,11 @@ export function UsersModule() {
         }
     }
 
-    async function db_create_new_user(id_session: string, prefix = "Игрок"): Promise<User | undefined> {
+    async function db_create_new_user(id_session: string, prefix = "Игрок"): Promise<UserState | undefined> {
         let id_user = 1;
         try {
             const [results, fields] = await Database.query('SELECT id FROM `users` ORDER BY id DESC LIMIT 1');
-            const users = results as any as User[];
+            const users = results as any as UserState[];
             if (users.length > 0) {
                 id_user = users[0].id + 1;
             }
@@ -171,7 +171,7 @@ export function UsersModule() {
                 if ("insertId" in result_insert) {
                     const last_inserted_id = result_insert.insertId;
                     const [results, fields] = await Database.query('SELECT * FROM `users` WHERE `id`= ?', [last_inserted_id]);
-                    const users = results as any as User[];
+                    const users = results as any as UserState[];
                     if (users.length > 0) {
                         return users[0];
                     }
@@ -184,7 +184,7 @@ export function UsersModule() {
         } while (is_exist)
     }
 
-    async function db_set_user_property<T extends keyof User>(id_user: number, prop: T, value: User[T]) {
+    async function db_set_user_property<T extends keyof UserState>(id_user: number, prop: T, value: UserState[T]) {
         try {
             await Database.query('UPDATE `users` SET `' + prop + '` = ? WHERE `id` = ? LIMIT 1', [value, id_user]);
             return true;

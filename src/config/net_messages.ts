@@ -10,6 +10,8 @@ export interface PostData {
 
 export enum NetIdMessages {
     CS_CONNECT,
+    CS_REGISTER,
+    SC_REGISTER,
     CS_PING,
     SC_PONG,
     SC_INIT,
@@ -50,6 +52,19 @@ interface SC_INIT {
     id_user: number
     server_time: number
     data: LocationData
+    wait_authorize: boolean
+    nick:string;
+    gender:number;
+}
+
+interface CS_REGISTER{
+    gender: number;
+    nick:string;
+}
+
+interface SC_REGISTER{
+    result:number;
+    text?:string;
 }
 
 interface SC_CLOSE {
@@ -134,6 +149,8 @@ export type NetMessages = {
     [NetIdMessages.CS_PING]: CS_PING
     [NetIdMessages.SC_PONG]: SC_PONG
     [NetIdMessages.CS_CONNECT]: CS_CONNECT
+    [NetIdMessages.CS_REGISTER]: CS_REGISTER
+    [NetIdMessages.SC_REGISTER]: SC_REGISTER
     [NetIdMessages.SC_INIT]: SC_INIT
     [NetIdMessages.SC_CLOSE]: SC_CLOSE
     [NetIdMessages.SC_JOIN]: SC_JOIN

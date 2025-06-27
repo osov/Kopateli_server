@@ -1,6 +1,6 @@
 import { EntityFullState, EntityState, NetIdMessages, NetMessages } from "../config/net_messages";
 import { IUser, User } from "../entitys/user";
-import { WsClient } from "../modules/types";
+import { UserState, WsClient } from "../modules/types";
 import { IClients } from "../utils/clients";
 import { BaseRoom } from "./base_room";
 
@@ -18,19 +18,19 @@ export function GameRoom(id_room: string, clients: IClients) {
         return list;
     }
 
-    function create_user(id_user: number, x:number, y:number) {
-        const user = User(id_user, true, 'nick-' + id_user, 20);
-        user.load_state(x, y, 0);
+    function create_user(id_user: number,  info: UserState) {
+        const user = User(id_user, info.gender == 1, info.nick);
+        user.load_state(info);
         users[id_user] = user;
         base.add_message(NetIdMessages.SC_ADD_ENTITY, { time: System.now(), ...user.get_state() });
         return user;
     }
 
     // подключился, авторизован
-    function on_join(socket: WsClient, info: {x:number, y:number}) {
+    function on_join(socket: WsClient, info: UserState) {
         const result = base.on_join(socket, info);
         const id_user = socket.data.id_user;
-        const user = create_user(id_user, info.x, info.y);
+        const user = create_user(id_user, info);
         // отправляем полный стейт мира
         base.send_message_all(NetIdMessages.SC_JOIN, { id_user, id_entity: user.get_id() });
         base.send_message_socket(socket, NetIdMessages.SC_WORLD_STATE, { list: get_world_state() });
